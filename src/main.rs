@@ -1,3 +1,10 @@
+mod editor;
+mod input;
+mod ui;
+
+use crate::editor::Editor;
+use crate::input::handle_input;
+use crate::ui::draw_ui;
 use crossterm::event::{self, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use ratatui::{
@@ -10,46 +17,18 @@ use ratatui::{
 use ropey::Rope;
 use std::io;
 
-struct Editor {
-    buffer: Rope,
-    cursor_pos: usize,
-}
-
-impl Editor {
-    fn new() -> Self {
-        Self {
-            buffer: Rope::new(),
-            cursor_pos: 0,
-        }
-    }
-
-    fn insert_char(&mut self, ch: char) {
-        self.buffer.insert_char(self.cursor_pos, ch);
-        self.cursor_pos += 1;
-    }
-
-    fn move_cursor_left(&mut self) {
-        if self.cursor_pos > 0 {
-            self.cursor_pos -= 1;
-        }
-    }
-
-    fn move_cursor_right(&mut self) {
-        if self.cursor_pos < self.buffer.len_chars() {
-            self.cursor_pos += 1;
-        }
-    }
-}
+const APP_NAME: &str = "Orkos";
 
 fn main() -> Result<(), io::Error> {
     enable_raw_mode()?;
+
     let stdout = io::stdout();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
     let mut editor = Editor::new();
 
     let os_name = std::env::consts::OS;
-    let system_info = format!("{} - Rust", os_name);
+    let system_info = format!("{} | Rust", os_name);
 
     loop {
         terminal.draw(|frame| {
@@ -64,7 +43,7 @@ fn main() -> Result<(), io::Error> {
                 .split(size);
 
             let header = Paragraph::new("Press Ctrl+Q to exit")
-                .block(Block::default().borders(Borders::ALL).title("Orkos"))
+                .block(Block::default().borders(Borders::ALL).title(APP_NAME))
                 .style(Style::default().fg(Color::Cyan));
             frame.render_widget(header, chunks[0]);
 
